@@ -1,27 +1,108 @@
-def scanner(s):
-    q = 0
-    for c in s:
-        for(qb, cb, qlb) in T:
-            if qb == q and cb == c:
-                q = qlb
-                break
-    return q
+import sys
 
-T= [(0, '-', 4),(0, '0', 1),(0, '1', 1),
-    (0, '2', 1),(0, '3', 1),(0, '4', 1),
-    (0, '5', 1),(0, '6', 1),(0, '7', 1),
-    (0, '8', 1),(0, '9', 1),(1, '.', 2),
-    (2, '0', 3),(2, '1', 3),(2, '2', 3),
-    (2, '3', 3),(2, '4', 3),(2, '5', 3),
-    (2, '6', 3),(2, '7', 3),(2, '8', 3),
-    (2, '9', 3),(4, '0', 1),(4, '1', 1),
-    (4, '2', 1),(4, '3', 1),(4, '4', 1),
-    (4, '5', 1),(4, '6', 1),(4, '7', 1),
-    (4, '8', 1),(4, '9', 1)
-    ]
+class Analyzer:
+    arg = sys.argv[1]
+    arg = arg.replace(" ","") 
 
-F = [(1,"INT"), (3,"FLOAT")]
+    def parser(arg):
+        i           = 0
+        count       = 0
+        index      = 0
+        number      = 0
+        operable    = []
+        size        = []
+        parsed      = []
+        splitado    = []
+        for ch in arg:
+            if ch.isdigit():
+                parsed.append(int(ch))
+                count += 1
+            else:
+                parsed.append(ch)
+                size.append(count)
+                count = 0
+        size.append(count)
 
+        for dig in parsed:
+            if isinstance(dig, int):
+                dig = dig*10**(size[i]-1-index)
+                index+=1
+                splitado.append(dig)
+            else:
+                i+=1
+                index=0
+                splitado.append(dig)
 
+        for j in splitado:
+            if j == str(j):
+                operable.append(number)
+                number = str(j)
+                operable.append(number)
+                number = 0
+            else:
+                number += j
+        operable.append(number)
+        return operable
+    
+    def tokens():
+        # tk = {}
+        count=1
+        parsed = Analyzer.parser(Analyzer.arg)
 
-print(scanner('-0123456789.9876543210'))
+        op = parsed[0]
+        for k in parsed:
+            if str(k) == "+":
+                op += parsed[count]
+            elif str(k) == "-":
+                op -= parsed[count]
+            count+=1
+        
+        # for i in parsed:
+        #     if   i == '+':
+        #         tk['SUM'] = i
+        #     elif i == '-':
+        #         tk['MIN'] = i
+        #     elif i == '*':
+        #         tk['MUL'] = i
+        #     elif i == '/':
+        #         tk['DIV'] = i
+        #     else:
+        #         tk['NUM'] = i
+        # print(tk)
+        return op
+    
+    def run():
+        out = Analyzer.tokens()
+        # i = 1
+        # out = []
+        
+        # op = tk["NUM"]
+        # for k in tk:
+        #     if "SUM" in tk[k+1]:
+        #         op += tk[i]["NUM"]
+        #     elif "MIN" in tk[k+1]:
+        #         op -= tk[i]["NUM"]
+        #     i+=1
+        
+
+        # while k < len(tk):
+        #     print("LOOP")
+        #     if "SUM" in tk[k]:
+        #         result = tk[k-1]['NUM'] + tk[k+1]['NUM']
+        #         out.append(result)
+            
+        #     elif "MIN" in tk[k]:
+        #         result = tk[k-1]['NUM'] - tk[k+1]['NUM']
+        #         out.append(result)
+
+        #     else:
+        #         k+=1
+        #         # result = tk[k-1]['NUM'] + tk[k+1]['NUM']
+        #         # out.append(result)
+        #     k+=1
+            
+        return out
+             
+teste = Analyzer.run()
+
+print(teste)
