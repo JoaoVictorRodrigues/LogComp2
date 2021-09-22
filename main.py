@@ -87,28 +87,25 @@ class Calculator:
 
     def Term(): 
         out = Calculator.Factor()
-        Calculator.tk.getNextToken()
     
-        while Calculator.tk.char.type == 'MUL'  :
+        while (Calculator.tk.char.type == 'MUL' or 
+               Calculator.tk.char.type == 'DIV'):
+            
             if Calculator.tk.char.type =='MUL':
                 Calculator.tk.getNextToken()
-                if Calculator.tk.char.type == 'INT':
-                    out *= Calculator.Term()
-                else:
-                    raise NameError('Err: MUL')
-            Calculator.tk.getNextToken()
-                    
-        while Calculator.tk.char.type == 'DIV':
-            if Calculator.tk.char.type == 'DIV':
+                out *= Calculator.Factor()
+            
+            elif Calculator.tk.char.type =='DIV':
                 Calculator.tk.getNextToken()
-                out = out // Calculator.Term()
-            Calculator.tk.getNextToken()
-
+                out = out // Calculator.Factor()
+      
         return out
     
     def Factor():
-        out = Calculator.tk.char.value
+        
         if Calculator.tk.char.type == 'INT':
+            out = Calculator.tk.char.value
+            Calculator.tk.getNextToken()
             return out
 
         elif Calculator.tk.char.type == 'OPEN':
@@ -116,6 +113,7 @@ class Calculator:
             Calculator.tk.getNextToken()
             out = Calculator.Expression()
             if Calculator.tk.char.type == 'CLOSE':
+                Calculator.tk.getNextToken()
                 return out
             else:
                 raise NameError('Err: Missing parentheses')
@@ -136,6 +134,10 @@ class Calculator:
 
     def run(code):
         Calculator.tk = Parser(code)
-        return Calculator.Expression()
+        out = Calculator.Expression()
+        if Calculator.tk.char.type != 'EOF':
+            raise NameError('Err: EOF')
+        else:
+            return out
 
 print(Calculator.run(arg))      
