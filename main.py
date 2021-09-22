@@ -1,32 +1,8 @@
-#Referencia: https://programadoresbrasil.com.br/2021/04/classe-abstrata-em-python-entenda-como-funcionam/
 import sys
 import re
 
 arg = sys.argv[1]
 arg = re.sub("[/][*]\s*(.*?)\s*[*][/]", "", arg)
-
-class Node:
-    def __init__(self,Value, listOfNodes):
-        self.value       = Value
-        self.children    = listOfNodes
-
-    def Evaluate(self):
-        pass
-
-class BinOp(Node):
-    def Evaluate(self):
-        pass
-class UnOp(Node):
-    def Evaluate(self):
-        pass
-class IntVal(Node):
-    def Evaluate(self):
-        pass
-class NoOp(Node):
-    def Evaluate(self):
-        pass
-class main():
-    pass
 class Token:
     def __init__(self,Type,Value):
         self.type = Type
@@ -35,7 +11,7 @@ class Token:
 class Parser:
     def __init__(self, origin):
         self.origin   = origin
-        self.index    = 0
+        self.index = 0
         self.char     = self.getNextToken()
 
     def getNextToken(self):
@@ -76,90 +52,62 @@ class Parser:
             elif self.origin[self.index] == '/':
                 self.char = (Token('DIV', '/'))
                 self.index += 1
-            elif self.origin[self.index] == '(':
-                self.char = (Token('OPEN', '('))
-                self.index += 1            
-            elif self.origin[self.index] == ')':
-                self.char = (Token('CLOSE', ')'))
-                self.index += 1
             else:
                 self.index += 1 
         return self.char
 
 class Calculator:
     
-    index       = 0
-    parentheses = 0
-    negative    = 1
+    def Term(): 
+        if Calculator.tk.char.type == 'INT':
+            out = Calculator.tk.char.value
+            Calculator.tk.getNextToken()
+            
+            while Calculator.tk.char.type == 'MUL'  :
+                if Calculator.tk.char.type =='MUL':
+                    Calculator.tk.getNextToken()
+                    if Calculator.tk.char.type == 'INT':
+                        out *= Calculator.tk.char.value
+                    else:
+                        raise NameError('Err: MUL')
+                Calculator.tk.getNextToken()
+                        
+            while Calculator.tk.char.type == 'DIV':
+                if Calculator.tk.char.type == 'DIV':
+                    Calculator.tk.getNextToken()
+                    if Calculator.tk.char.type == 'INT':
+                        out = out // Calculator.tk.char.value
+                    else:
+                        raise NameError('Err: DIV')
+                Calculator.tk.getNextToken()
+        else:
+            raise NameError('Err: TERM')
+        return out
 
     def Expression():
-        out = Calculator.Term()            
-        while (Calculator.tk.char.type == 'SUM' or 
-               Calculator.tk.char.type == 'SUB' or 
-               Calculator.tk.char.type == 'MUL' or 
-               Calculator.tk.char.type == 'DIV'):
-            
-            if Calculator.tk.char.type =='SUM':
-                Calculator.tk.getNextToken()
-                out += Calculator.Term()
-    
-            elif Calculator.tk.char.type == 'SUB':
-                Calculator.tk.getNextToken()
-                out -= Calculator.Term()
-                
-        return out
-
-    def Term(): 
-        out = Calculator.Factor()
-        Calculator.tk.getNextToken()
-    
-        while Calculator.tk.char.type == 'MUL'  :
-            if Calculator.tk.char.type =='MUL':
-                Calculator.tk.getNextToken()
-                if Calculator.tk.char.type == 'INT':
-                    out *= Calculator.Term()
-                else:
-                    raise NameError('Err: MUL')
-            Calculator.tk.getNextToken()
-                    
-        while Calculator.tk.char.type == 'DIV':
-            if Calculator.tk.char.type == 'DIV':
-                Calculator.tk.getNextToken()
-                out = out // Calculator.Term()
-            Calculator.tk.getNextToken()
-
-        return out
-    
-    def Factor():
-        out = Calculator.tk.char.value
-        if Calculator.tk.char.type == 'INT':
+            out = Calculator.Term()            
+            while Calculator.tk.char.type == 'SUM' or Calculator.tk.char.type == 'SUB' or Calculator.tk.char.type == 'MUL' or Calculator.tk.char.type == 'DIV':
+                if Calculator.tk.char.type =='SUM':
+                    Calculator.tk.getNextToken()
+                    if Calculator.tk.char.type == 'INT':
+                        out += Calculator.Term()
+                    else:
+                        raise NameError('Err: SUM')
+                elif Calculator.tk.char.type == 'SUB':
+                    Calculator.tk.getNextToken()
+                    if Calculator.tk.char.type == 'INT':
+                        out -= Calculator.Term()
+                    else:
+                        raise NameError('Err: SUB')
             return out
-
-        elif Calculator.tk.char.type == 'OPEN':
-            Calculator.parentheses += 1
-            Calculator.tk.getNextToken()
-            out = Calculator.Expression()
-            if Calculator.tk.char.type == 'CLOSE':
-                return out
-            else:
-                raise NameError('Err: Missing parentheses')
-
-        elif Calculator.tk.char.type == 'SUB':
-            Calculator.index+=1
-            Calculator.tk.getNextToken()
-            Calculator.Factor()
-            Calculator.negative = (-1)**(Calculator.index)
-            
-        elif Calculator.tk.char.type == 'SUM':
-            Calculator.tk.getNextToken()
-            Calculator.Factor()
-        
-        out = Calculator.tk.char.value * Calculator.negative
-        return out
               
 
     def run(code):
         Calculator.tk = Parser(code)
-        return Calculator.Expression()
+        out = Calculator.Expression()
+        if Calculator.tk.char.type != 'EOF':
+            raise NameError('Err: EOF')
+        else:
+            return out
 
 print(Calculator.run(arg))      
