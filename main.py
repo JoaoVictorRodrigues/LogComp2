@@ -1,8 +1,32 @@
+#Referencia: https://programadoresbrasil.com.br/2021/04/classe-abstrata-em-python-entenda-como-funcionam/
 import sys
 import re
 
 arg = sys.argv[1]
 arg = re.sub("[/][*]\s*(.*?)\s*[*][/]", "", arg)
+
+class Node:
+    def __init__(self,Value, listOfNodes):
+        self.value       = Value
+        self.children    = listOfNodes
+
+    def Evaluate(self):
+        pass
+
+class BinOp(Node):
+    def Evaluate(self):
+        pass
+class UnOp(Node):
+    def Evaluate(self):
+        pass
+class IntVal(Node):
+    def Evaluate(self):
+        pass
+class NoOp(Node):
+    def Evaluate(self):
+        pass
+class main():
+    pass
 class Token:
     def __init__(self,Type,Value):
         self.type = Type
