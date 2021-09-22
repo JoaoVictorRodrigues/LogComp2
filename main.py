@@ -1,108 +1,109 @@
 import sys
+import re
 
-class Analyzer:
-    arg = sys.argv[1]
-    arg = arg.replace(" ","") 
+arg = sys.argv[1]
+arg = re.sub("[/][*]\s*(.*?)\s*[*][/]", "", arg)
+class Token:
+    def __init__(self,Type,Value):
+        self.type = Type
+        self.value = Value 
 
-    def parser(arg):
-        i           = 0
-        count       = 0
-        index      = 0
-        number      = 0
-        operable    = []
-        size        = []
-        parsed      = []
-        splitado    = []
-        for ch in arg:
-            if ch.isdigit():
-                parsed.append(int(ch))
-                count += 1
+class Parser:
+    def __init__(self, origin):
+        self.origin   = origin
+        self.index = 0
+        self.char     = self.getNextToken()
+
+    def getNextToken(self):
+        
+        ch      = 0
+        index   = 0
+        number  = 0
+
+        lenArg    = len(self.origin)
+        operables = []
+        
+
+        while self.index < lenArg and self.origin[self.index].isspace():
+            self.index += 1
+
+        if self.index == lenArg:
+            self.char = Token('EOF', 'end')
+
+        elif self.origin[self.index].isdigit():
+            while self.index < lenArg and self.origin[self.index].isdigit():
+                operables.append(int(self.origin[self.index]))
+                self.index += 1
+            for ch in operables:
+                number += int(ch)*10**(len(operables) - index - 1)
+                index += 1
+            self.char = Token('INT', number)
+
+        elif self.index < lenArg:
+            if self.origin[self.index] == '+':
+                self.char = (Token('SUM', '+'))
+                self.index += 1
+            elif self.origin[self.index] == '-':
+                self.char = (Token('SUB', '-'))
+                self.index += 1
+            elif self.origin[self.index] == '*':
+                self.char = (Token('MUL', '*'))
+                self.index += 1
+            elif self.origin[self.index] == '/':
+                self.char = (Token('DIV', '/'))
+                self.index += 1
             else:
-                parsed.append(ch)
-                size.append(count)
-                count = 0
-        size.append(count)
+                self.index += 1 
+        return self.char
 
-        for dig in parsed:
-            if isinstance(dig, int):
-                dig = dig*10**(size[i]-1-index)
-                index+=1
-                splitado.append(dig)
-            else:
-                i+=1
-                index=0
-                splitado.append(dig)
-
-        for j in splitado:
-            if j == str(j):
-                operable.append(number)
-                number = str(j)
-                operable.append(number)
-                number = 0
-            else:
-                number += j
-        operable.append(number)
-        return operable
+class Calculator:
     
-    def tokens():
-        # tk = {}
-        count=1
-        parsed = Analyzer.parser(Analyzer.arg)
-
-        op = parsed[0]
-        for k in parsed:
-            if str(k) == "+":
-                op += parsed[count]
-            elif str(k) == "-":
-                op -= parsed[count]
-            count+=1
-        
-        # for i in parsed:
-        #     if   i == '+':
-        #         tk['SUM'] = i
-        #     elif i == '-':
-        #         tk['MIN'] = i
-        #     elif i == '*':
-        #         tk['MUL'] = i
-        #     elif i == '/':
-        #         tk['DIV'] = i
-        #     else:
-        #         tk['NUM'] = i
-        # print(tk)
-        return op
-    
-    def run():
-        out = Analyzer.tokens()
-        # i = 1
-        # out = []
-        
-        # op = tk["NUM"]
-        # for k in tk:
-        #     if "SUM" in tk[k+1]:
-        #         op += tk[i]["NUM"]
-        #     elif "MIN" in tk[k+1]:
-        #         op -= tk[i]["NUM"]
-        #     i+=1
-        
-
-        # while k < len(tk):
-        #     print("LOOP")
-        #     if "SUM" in tk[k]:
-        #         result = tk[k-1]['NUM'] + tk[k+1]['NUM']
-        #         out.append(result)
+    def Term(): 
+        if Calculator.tk.char.type == 'INT':
+            out = Calculator.tk.char.value
+            Calculator.tk.getNextToken()
             
-        #     elif "MIN" in tk[k]:
-        #         result = tk[k-1]['NUM'] - tk[k+1]['NUM']
-        #         out.append(result)
-
-        #     else:
-        #         k+=1
-        #         # result = tk[k-1]['NUM'] + tk[k+1]['NUM']
-        #         # out.append(result)
-        #     k+=1
-            
+            while Calculator.tk.char.type == 'MUL'  :
+                if Calculator.tk.char.type =='MUL':
+                    Calculator.tk.getNextToken()
+                    if Calculator.tk.char.type == 'INT':
+                        out *= Calculator.tk.char.value
+                    else:
+                        raise NameError('Err: MUL')
+                Calculator.tk.getNextToken()
+                        
+            while Calculator.tk.char.type == 'DIV':
+                if Calculator.tk.char.type == 'DIV':
+                    Calculator.tk.getNextToken()
+                    if Calculator.tk.char.type == 'INT':
+                        out = out // Calculator.tk.char.value
+                    else:
+                        raise NameError('Err: DIV')
+                Calculator.tk.getNextToken()
+        else:
+            raise NameError('Err: TERM')
         return out
-             
-teste = Analyzer.run()
 
-print(teste)
+    def Expression():
+            out = Calculator.Term()            
+            while Calculator.tk.char.type == 'SUM' or Calculator.tk.char.type == 'SUB' or Calculator.tk.char.type == 'MUL' or Calculator.tk.char.type == 'DIV':
+                if Calculator.tk.char.type =='SUM':
+                    Calculator.tk.getNextToken()
+                    if Calculator.tk.char.type == 'INT':
+                        out += Calculator.Term()
+                    else:
+                        raise NameError('Err: SUM')
+                elif Calculator.tk.char.type == 'SUB':
+                    Calculator.tk.getNextToken()
+                    if Calculator.tk.char.type == 'INT':
+                        out -= Calculator.Term()
+                    else:
+                        raise NameError('Err: SUB')
+            return out
+              
+
+    def run(code):
+        Calculator.tk = Parser(code)
+        return Calculator.Expression()
+
+print(Calculator.run(arg))      
