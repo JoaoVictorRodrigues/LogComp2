@@ -104,6 +104,11 @@ class Calculator:
 
     def run(code):
         Calculator.tk = Parser(code)
-        return Calculator.Expression()
+        
+        out = Calculator.Expression()
+        if Calculator.tk.char.type != 'EOF':
+            raise NameError('Err: EOF')
+        else:
+            return out
 
 print(Calculator.run(arg))      
