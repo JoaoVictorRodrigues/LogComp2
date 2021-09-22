@@ -118,20 +118,21 @@ class Calculator:
             else:
                 raise NameError('Err: Missing parentheses')
 
-        elif Calculator.tk.char.type == 'SUB':
-            Calculator.index+=1
-            Calculator.tk.getNextToken()
-            Calculator.Factor()
-            Calculator.negative = (-1)**(Calculator.index)
+        elif (Calculator.tk.char.type == 'SUB' or 
+              Calculator.tk.char.type == 'SUM'):
+            if Calculator.tk.char.type == 'SUB':
+                Calculator.index+=1
+                Calculator.tk.getNextToken()
+                out = (-1) * Calculator.Factor()
+                return out
             
-        elif Calculator.tk.char.type == 'SUM':
-            Calculator.tk.getNextToken()
-            Calculator.Factor()
-        
-        out = Calculator.tk.char.value * Calculator.negative
-        return out
-              
-
+            elif Calculator.tk.char.type == 'SUM':
+                Calculator.tk.getNextToken()
+                out = Calculator.Factor()
+                return out   
+        else:
+            raise NameError('Err: Ivalid Operation')
+                      
     def run(code):
         Calculator.tk = Parser(code)
         out = Calculator.Expression()
