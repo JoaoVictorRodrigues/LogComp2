@@ -15,18 +15,30 @@ class Node:
 
 class BinOp(Node):
     def Evaluate(self):
-        pass
+        if self.value == "+":
+            return self.children[0].Evaluate() + self.children[1].Evaluate()
+        elif self.value == "-":
+            return self.children[0].Evaluate() - self.children[1].Evaluate()
+        elif self.value == "*":
+            return self.children[0].Evaluate() * self.children[1].Evaluate()
+        elif self.value == "/":
+            return self.children[0].Evaluate() //self.children[1].Evaluate()
+        
 class UnOp(Node):
     def Evaluate(self):
-        pass
+        if self.value == "+":
+            return self.children[0].Evaluate()
+        elif self.value == "-":
+            return self.children[0].Evaluate()*(-1)
 class IntVal(Node):
     def Evaluate(self):
-        pass
+        return self.value
 class NoOp(Node):
     def Evaluate(self):
         pass
 class main():
     pass
+
 class Token:
     def __init__(self,Type,Value):
         self.type = Type
@@ -91,9 +103,10 @@ class Calculator:
     index       = 0
     parentheses = 0
     negative    = 1
-
+    # Com a introdoção da estrutura de árvora agoa as operações são simiralres a do Rply
+    # result = experession + expression 
     def Expression():
-        out = Calculator.Term()            
+        out = Calculator.Term()   # Primeiro lado da Experssão         
         while (Calculator.tk.char.type == 'SUM' or 
                Calculator.tk.char.type == 'SUB' or 
                Calculator.tk.char.type == 'MUL' or 
@@ -101,12 +114,14 @@ class Calculator:
             
             if Calculator.tk.char.type =='SUM':
                 Calculator.tk.getNextToken()
-                out += Calculator.Term()
+                exp = Calculator.Term()
+                out = BinOp('+',[out, exp])
     
             elif Calculator.tk.char.type == 'SUB':
                 Calculator.tk.getNextToken()
-                out -= Calculator.Term()
-                
+                exp = Calculator.Term()
+                out = BinOp('-',[out, exp])
+
         return out
 
     def Term(): 
@@ -117,12 +132,13 @@ class Calculator:
             
             if Calculator.tk.char.type =='MUL':
                 Calculator.tk.getNextToken()
-                out *= Calculator.Factor()
+                exp = Calculator.Term()
+                out = BinOp('*',[out, exp])
             
             elif Calculator.tk.char.type =='DIV':
                 Calculator.tk.getNextToken()
-                out = out // Calculator.Factor()
-      
+                exp = Calculator.Term()
+                out = BinOp('-',[out, exp])
         return out
     
     def Factor():
@@ -130,6 +146,7 @@ class Calculator:
         if Calculator.tk.char.type == 'INT':
             out = Calculator.tk.char.value
             Calculator.tk.getNextToken()
+            out = IntVal(out, [])
             return out
 
         elif Calculator.tk.char.type == 'OPEN':
@@ -144,15 +161,18 @@ class Calculator:
 
         elif (Calculator.tk.char.type == 'SUB' or 
               Calculator.tk.char.type == 'SUM'):
+            
             if Calculator.tk.char.type == 'SUB':
                 Calculator.index+=1
                 Calculator.tk.getNextToken()
-                out = (-1) * Calculator.Factor()
+                exp = Calculator.Factor()
+                out = UnOp("-", [exp])
                 return out
             
             elif Calculator.tk.char.type == 'SUM':
                 Calculator.tk.getNextToken()
-                out = Calculator.Factor()
+                exp = Calculator.Factor()
+                out = UnOp("-", [exp])
                 return out   
         else:
             raise NameError('Err: Ivalid Operation')
@@ -165,4 +185,5 @@ class Calculator:
         else:
             return out
 
-print(Calculator.run(arg))      
+out = Calculator.run(arg)
+print(out.Evaluate())      
