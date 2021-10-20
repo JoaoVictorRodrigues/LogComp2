@@ -15,20 +15,20 @@ class Node:
 
 class BinOp(Node):
     def Evaluate(self):
-        if self.value == "+":
+        if self.value == '+':
             return self.children[0].Evaluate() + self.children[1].Evaluate()
-        elif self.value == "-":
+        elif self.value == '-':
             return self.children[0].Evaluate() - self.children[1].Evaluate()
-        elif self.value == "*":
+        elif self.value == '*':
             return self.children[0].Evaluate() * self.children[1].Evaluate()
-        elif self.value == "/":
-            return self.children[0].Evaluate() //self.children[1].Evaluate()
+        elif self.value == '/':
+            return self.children[0].Evaluate() // self.children[1].Evaluate()
         
 class UnOp(Node):
     def Evaluate(self):
-        if self.value == "+":
+        if self.value == '+':
             return self.children[0].Evaluate()
-        elif self.value == "-":
+        elif self.value == '-':
             return self.children[0].Evaluate()*(-1)
 class IntVal(Node):
     def Evaluate(self):
@@ -126,19 +126,20 @@ class Calculator:
 
     def Term(): 
         out = Calculator.Factor()
-    
+            
         while (Calculator.tk.char.type == 'MUL' or 
                Calculator.tk.char.type == 'DIV'):
             
             if Calculator.tk.char.type =='MUL':
                 Calculator.tk.getNextToken()
-                exp = Calculator.Term()
+                exp = Calculator.Factor()
                 out = BinOp('*',[out, exp])
-            
+
             elif Calculator.tk.char.type =='DIV':
                 Calculator.tk.getNextToken()
-                exp = Calculator.Term()
-                out = BinOp('-',[out, exp])
+                exp = Calculator.Factor()
+                out = BinOp('/',[out, exp])
+
         return out
     
     def Factor():
@@ -172,7 +173,7 @@ class Calculator:
             elif Calculator.tk.char.type == 'SUM':
                 Calculator.tk.getNextToken()
                 exp = Calculator.Factor()
-                out = UnOp("-", [exp])
+                out = UnOp("+", [exp])
                 return out   
         else:
             raise NameError('Err: Ivalid Operation')
