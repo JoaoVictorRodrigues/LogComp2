@@ -90,6 +90,20 @@ class Calculator:
             Calculator.tk.getNextToken()
             return out
 
+        elif Calculator.tk.char.type == 'READLN':
+            Calculator.tk.getNextToken()
+            if Calculator.tk.char.type == 'OPEN':
+                Calculator.tk.getNextToken()
+                if Calculator.tk.char.type == 'CLOSE':
+                    Calculator.tk.getNextToken()
+                else:
+                    raise NameError("Erro: parênteses não fechado")
+            else:
+                raise NameError("Erro: readln é uma função abra e feche parenteses para chama-la")
+
+            out = nodes.InputOp("readln", [])
+
+
         else:
             raise NameError('Err: Ivalid Operation')
         
@@ -105,13 +119,12 @@ class Calculator:
         return nodes.Block("COMMAND", blockList)
     
     def Command():
-
         if Calculator.tk.char.type == 'IDENTIFIER':
             var = Calculator.tk.char.value
             Calculator.tk.getNextToken()
-            if Calculator.tk.char.type == 'EQUAL':
+            if Calculator.tk.char.type == 'ASSING':
                 Calculator.tk.getNextToken()
-                res = nodes.AssignmentOp(Calculator.tk.char.value, [var, Calculator.Expression()])    
+                out = nodes.AssignmentOp(Calculator.tk.char.value, [var, Calculator.Expression()])    
             else:
                 raise NameError("Err: Missing assigment symbol (=)")
                 
@@ -124,11 +137,52 @@ class Calculator:
                     Calculator.tk.getNextToken()
                 else:
                     raise NameError("Err: Missig close parentheses")
-            res = nodes.PrintOp("println", [val])
+            out = nodes.PrintOp("println", [val])
 
         else:
-            res = nodes.NoOp(0, [])
-        return res
+            out = nodes.NoOp(0, [])
+        return out
+
+    def ExpOR():
+        out = Calculator.ExpAND()
+        while Calculator.tk.actual.type == 'OR':
+            Calculator.tk.getNextToken()
+            children = [out, Calculator.ExpAND()]
+            out = nodes.BinOp('||', children)
+        return out
+
+    def ExpAND():
+        out = Calculator.ExpEQUAL()
+        while Calculator.tk.actual.type == 'AND':
+            Calculator.tk.getNextToken()
+            children = [out, Calculator.ExpEQUAL()]
+            out = nodes.BinOp('&&', children)
+        return out
+
+    def ExpEQUAL():
+        out = Calculator.ExpREL()
+        while Calculator.tk.actual.type == 'EQUAL':
+            Calculator.tk.getNextToken()
+            children = [out, Calculator.ExpREL()]
+            out = nodes.BinOp('==', children)
+        return out
+
+    def ExpREL():
+        out = Calculator.Expression()
+        while (Calculator.tk.actual.type == 'GREATER' 
+               or Calculator.tk.actual.type == 'LESS'):
+               
+            if Calculator.tk.actual.type == 'GREATER':
+                Calculator.tk.getNextToken()
+                children = [out, Calculator.Expression()]
+                out = nodes.BinOp('>', children)
+
+            elif Calculator.tk.actual.type == 'LESS':
+                Calculator.tk.getNextToken()
+                children = [out, Calculator.Expression()]
+                out = nodes.BinOp('<', children)
+        return out
+    
                       
     def run(code):
         code = Unifier.sliceComment(code)

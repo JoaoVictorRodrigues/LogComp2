@@ -16,6 +16,17 @@ class BinOp(Node):
             return self.children[0].Evaluate(symbs) * self.children[1].Evaluate(symbs)
         elif self.value == '/':
             return self.children[0].Evaluate(symbs) // self.children[1].Evaluate(symbs)
+        elif self.value == '==':
+            return self.children[0].Evaluate(symbs) == self.children[1].Evaluate(symbs)
+        elif self.value == '<':
+            return self.children[0].Evaluate(symbs) < self.children[1].Evaluate(symbs)
+        elif self.value == '>':
+            return self.children[0].Evaluate(symbs) > self.children[1].Evaluate(symbs)
+        elif self.value == '||':
+            return self.children[0].Evaluate(symbs) or self.children[1].Evaluate(symbs)
+        elif self.value == '&&':
+            return self.children[0].Evaluate(symbs) and self.children[1].Evaluate(symbs)
+
         
 class UnOp(Node):
     def Evaluate(self,symbs):
@@ -23,6 +34,8 @@ class UnOp(Node):
             return self.children[0].Evaluate(symbs)
         elif self.value == '-':
             return self.children[0].Evaluate(symbs)*(-1)
+        elif self.value == '!':
+            return not(self.children[0].Evaluate(symbs))
 
 class IntVal(Node):
     def Evaluate(self,symbs):
@@ -61,3 +74,19 @@ class AssignmentOp(Node):
 class PrintOp(Node):
     def Evaluate(self, symbs):
         print(self.children[0].Evaluate(symbs))
+
+class WhileOp(Node):
+    def Evaluate(self, symbs):
+        while self.children[0].Evaluate(symbs):
+            self.children[1].Evaluate(symbs)
+ 
+class IfOp(Node):
+    def Evaluate(self, symbs):
+        if self.children[0].Evaluate(symbs):
+            self.children[1].Evaluate(symbs)
+        elif len(self.children) == 3:
+            self.children[2].Evaluate(symbs)
+            
+class InputOp(Node):
+    def Evaluate(self, symbs):
+        return int(input())

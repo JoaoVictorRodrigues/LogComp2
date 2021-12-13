@@ -1,5 +1,5 @@
-lock = ["println"]
-PRINTLN = lock
+lock = ["println","if","else","while","readln"]
+PRINTLN,IF,ELSE,WHILE,READLN = lock
 
 class Token:
     def __init__(self,Type,Value):
@@ -40,8 +40,7 @@ class Parser:
                 self.index += 1
             
             variable = letter
-
-
+            
             if variable in lock:
                 # print("Variable", variable)
                 self.char = (Token(variable.upper(), variable))
@@ -79,11 +78,36 @@ class Parser:
                 self.char = (Token('CLOSE', ')'))
                 self.index += 1
             elif self.origin[self.index] == '=':
-                self.char = (Token('EQUAL', '='))
+                self.char = (Token('ASSING', '='))
                 self.index += 1
             elif self.origin[self.index] == ';':
                 self.char = (Token('ENDLINE', ';'))
                 self.index += 1
+            elif self.origin[self.index] == '{':
+                self.char = (Token('KEYSOPEN', '{'))
+                self.index += 1
+            elif self.origin[self.index] == '}':
+                self.char = (Token('KEYSCLOSE', '}'))
+                self.index += 1
+            elif self.origin[self.index] == '=' and self.origin[self.index+1] == '=':
+                self.char = (Token('EQUAL', '=='))
+                self.index += 2
+            elif self.origin[self.index] == '!':
+                self.char = (Token('NOT', '!'))
+                self.index += 1
+            elif self.origin[self.index] == '>':
+                self.char = (Token('GREATER', '>'))
+                self.index += 1
+            elif self.origin[self.index] == '<':
+                self.char = (Token('LESS', '<'))
+                self.index += 1
+            elif self.origin[self.index] == '&' and self.origin[self.index+1] == '&':
+                self.char = (Token('AND', '&&'))
+                self.index += 2
+            elif self.origin[self.index] == '|' and self.origin[self.index+1] == '|':
+                self.char = (Token('OR', '||'))
+                self.index += 2
+                
             else:
                 self.index += 1 
         return self.char
