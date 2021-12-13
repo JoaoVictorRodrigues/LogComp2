@@ -1,112 +1,22 @@
 #Referencia: https://programadoresbrasil.com.br/2021/04/classe-abstrata-em-python-entenda-como-funcionam/
+
 import sys
 import re
+import nodeClass as nodes
+import tokensClass as tokens
 
-arg = sys.argv[1]
-arg = re.sub("[/][*]\s*(.*?)\s*[*][/]", "", arg)
-
-class Node:
-    def __init__(self,Value, listOfNodes):
-        self.value       = Value
-        self.children    = listOfNodes
-
-    def Evaluate(self):
-        pass
-
-class BinOp(Node):
-    def Evaluate(self):
-        if self.value == '+':
-            return self.children[0].Evaluate() + self.children[1].Evaluate()
-        elif self.value == '-':
-            return self.children[0].Evaluate() - self.children[1].Evaluate()
-        elif self.value == '*':
-            return self.children[0].Evaluate() * self.children[1].Evaluate()
-        elif self.value == '/':
-            return self.children[0].Evaluate() // self.children[1].Evaluate()
-        
-class UnOp(Node):
-    def Evaluate(self):
-        if self.value == '+':
-            return self.children[0].Evaluate()
-        elif self.value == '-':
-            return self.children[0].Evaluate()*(-1)
-class IntVal(Node):
-    def Evaluate(self):
-        return self.value
-class NoOp(Node):
-    def Evaluate(self):
-        pass
-class main():
-    pass
-
-class Token:
-    def __init__(self,Type,Value):
-        self.type = Type
-        self.value = Value 
-
-class Parser:
-    def __init__(self, origin):
-        self.origin   = origin
-        self.index    = 0
-        self.char     = self.getNextToken()
-
-    def getNextToken(self):
-        
-        ch      = 0
-        index   = 0
-        number  = 0
-
-        lenArg    = len(self.origin)
-        operables = []
-        
-
-        while self.index < lenArg and self.origin[self.index].isspace():
-            self.index += 1
-
-        if self.index == lenArg:
-            self.char = Token('EOF', 'end')
-
-        elif self.origin[self.index].isdigit():
-            while self.index < lenArg and self.origin[self.index].isdigit():
-                operables.append(int(self.origin[self.index]))
-                self.index += 1
-            for ch in operables:
-                number += int(ch)*10**(len(operables) - index - 1)
-                index += 1
-            self.char = Token('INT', number)
-
-        elif self.index < lenArg:
-            if self.origin[self.index] == '+':
-                self.char = (Token('SUM', '+'))
-                self.index += 1
-            elif self.origin[self.index] == '-':
-                self.char = (Token('SUB', '-'))
-                self.index += 1
-            elif self.origin[self.index] == '*':
-                self.char = (Token('MUL', '*'))
-                self.index += 1
-            elif self.origin[self.index] == '/':
-                self.char = (Token('DIV', '/'))
-                self.index += 1
-            elif self.origin[self.index] == '(':
-                self.char = (Token('OPEN', '('))
-                self.index += 1            
-            elif self.origin[self.index] == ')':
-                self.char = (Token('CLOSE', ')'))
-                self.index += 1
-            else:
-                self.index += 1 
-        return self.char
-
+class Unifier:
+    def sliceComment(arg):
+        arg = re.sub("[/][*]\s*(.*?)\s*[*][/]", "", arg)
+        return(arg)
 class Calculator:
     
     index       = 0
     parentheses = 0
     negative    = 1
-    # Com a introdoção da estrutura de árvora agoa as operações são simiralres a do Rply
-    # result = experession + expression 
+
     def Expression():
-        out = Calculator.Term()   # Primeiro lado da Experssão         
+        out = Calculator.Term()   #       
         while (Calculator.tk.char.type == 'SUM' or 
                Calculator.tk.char.type == 'SUB' or 
                Calculator.tk.char.type == 'MUL' or 
@@ -115,39 +25,38 @@ class Calculator:
             if Calculator.tk.char.type =='SUM':
                 Calculator.tk.getNextToken()
                 exp = Calculator.Term()
-                out = BinOp('+',[out, exp])
+                out = nodes.BinOp('+',[out, exp])
     
             elif Calculator.tk.char.type == 'SUB':
                 Calculator.tk.getNextToken()
                 exp = Calculator.Term()
-                out = BinOp('-',[out, exp])
+                out = nodes.BinOp('-',[out, exp])
 
         return out
 
     def Term(): 
         out = Calculator.Factor()
-            
+
         while (Calculator.tk.char.type == 'MUL' or 
                Calculator.tk.char.type == 'DIV'):
             
-            if Calculator.tk.char.type =='MUL':
+            if Calculator.tk.char.type == 'MUL':
                 Calculator.tk.getNextToken()
                 exp = Calculator.Factor()
-                out = BinOp('*',[out, exp])
+                out = nodes.BinOp('*',[out, exp])
 
-            elif Calculator.tk.char.type =='DIV':
+            elif Calculator.tk.char.type == 'DIV':
                 Calculator.tk.getNextToken()
                 exp = Calculator.Factor()
-                out = BinOp('/',[out, exp])
+                out = nodes.BinOp('/',[out, exp])
 
         return out
     
     def Factor():
-        
         if Calculator.tk.char.type == 'INT':
             out = Calculator.tk.char.value
             Calculator.tk.getNextToken()
-            out = IntVal(out, [])
+            out = nodes.IntVal(out, [])
             return out
 
         elif Calculator.tk.char.type == 'OPEN':
@@ -167,24 +76,83 @@ class Calculator:
                 Calculator.index+=1
                 Calculator.tk.getNextToken()
                 exp = Calculator.Factor()
-                out = UnOp("-", [exp])
-                return out
+                out = nodes.UnOp("-", [exp])
             
             elif Calculator.tk.char.type == 'SUM':
                 Calculator.tk.getNextToken()
                 exp = Calculator.Factor()
-                out = UnOp("+", [exp])
-                return out   
+                out = nodes.UnOp("+", [exp])
+
+            return out   
+
+        elif Calculator.tk.char.type == 'IDENTIFIER':
+            out = nodes.IdentifierOp(Calculator.tk.char.value,[])
+            Calculator.tk.getNextToken()
+            return out
+
         else:
             raise NameError('Err: Ivalid Operation')
+        
+    def Block():
+        blockList=[]
+        while Calculator.tk.char.type != 'EOF':
+            blockList.append(Calculator.Command())
+            if Calculator.tk.char.type != 'ENDLINE':
+                raise NameError("Err: Missing ';'")
+            else:
+                Calculator.tk.getNextToken()
+
+        return nodes.Block("COMMAND", blockList)
+    
+    def Command():
+
+        if Calculator.tk.char.type == 'IDENTIFIER':
+            var = Calculator.tk.char.value
+            Calculator.tk.getNextToken()
+            if Calculator.tk.char.type == 'EQUAL':
+                Calculator.tk.getNextToken()
+                res = nodes.AssignmentOp(Calculator.tk.char.value, [var, Calculator.Expression()])    
+            else:
+                raise NameError("Err: Missing assigment symbol (=)")
+                
+        elif Calculator.tk.char.type == 'PRINTLN':
+            Calculator.tk.getNextToken()
+            if Calculator.tk.char.type == 'OPEN':
+                Calculator.tk.getNextToken()
+                val = Calculator.Expression()
+                if Calculator.tk.char.type == 'CLOSE':
+                    Calculator.tk.getNextToken()
+                else:
+                    raise NameError("Err: Missig close parentheses")
+            res = nodes.PrintOp("println", [val])
+
+        else:
+            res = nodes.NoOp(0, [])
+        return res
                       
     def run(code):
-        Calculator.tk = Parser(code)
-        out = Calculator.Expression()
+        code = Unifier.sliceComment(code)
+        Calculator.tk = tokens.Parser(code)
+        out = Calculator.Block()
+        Calculator.tk.getNextToken()
+
+        while Calculator.tk.char.type == 'ENTER':
+            Calculator.tk.getNextToken()
+
         if Calculator.tk.char.type != 'EOF':
             raise NameError('Err: EOF')
         else:
             return out
 
-out = Calculator.run(arg)
-print(out.Evaluate())      
+if __name__ == "__main__": 
+    if (len(sys.argv) == 2):
+        file = sys.argv[1]
+    else:
+        raise NameError('Err: only one .c file')
+    symbs = nodes.SymbolTable()
+
+    with open (file, 'r') as file:
+        arg = file.read()
+    out = Calculator.run(arg)
+
+    out.Evaluate(symbs)
