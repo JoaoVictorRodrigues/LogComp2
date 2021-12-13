@@ -16,7 +16,7 @@ class Calculator:
     negative    = 1
 
     def Expression():
-        out = Calculator.Term()   #       
+        out = Calculator.Term()  
         while (Calculator.tk.char.type == 'SUM' or 
                Calculator.tk.char.type == 'SUB' or 
                Calculator.tk.char.type == 'MUL' or 
@@ -53,6 +53,7 @@ class Calculator:
         return out
     
     def Factor():
+        # print(Calculator.tk.char.type,Calculator.tk.char.value)
         if Calculator.tk.char.type == 'INT':
             out = Calculator.tk.char.value
             Calculator.tk.getNextToken()
@@ -70,7 +71,8 @@ class Calculator:
                 raise NameError('Err: Missing parentheses')
 
         elif (Calculator.tk.char.type == 'SUB' or 
-              Calculator.tk.char.type == 'SUM'):
+              Calculator.tk.char.type == 'SUM' or 
+              Calculator.tk.char.type == 'NOT'):
             
             if Calculator.tk.char.type == 'SUB':
                 Calculator.index+=1
@@ -82,6 +84,11 @@ class Calculator:
                 Calculator.tk.getNextToken()
                 exp = Calculator.Factor()
                 out = nodes.UnOp("+", [exp])
+            
+            elif Calculator.tk.char.type == 'NOT':
+                Calculator.tk.getNextToken()
+                exp = Calculator.Factor()
+                out = nodes.UnOp("!", [exp])
 
             return out   
 
@@ -90,7 +97,7 @@ class Calculator:
             Calculator.tk.getNextToken()
             return out
 
-        elif Calculator.tk.char.type == 'READLN':
+        elif Calculator.tk.char.type == tokens.READLN:
             Calculator.tk.getNextToken()
             if Calculator.tk.char.type == 'OPEN':
                 Calculator.tk.getNextToken()
@@ -102,21 +109,29 @@ class Calculator:
                 raise NameError("Erro: readln é uma função abra e feche parenteses para chama-la")
 
             out = nodes.InputOp("readln", [])
-
-
+            
         else:
             raise NameError('Err: Ivalid Operation')
         
+        return out
+        
     def Block():
         blockList=[]
-        while Calculator.tk.char.type != 'EOF':
-            blockList.append(Calculator.Command())
-            if Calculator.tk.char.type != 'ENDLINE':
-                raise NameError("Err: Missing ';'")
-            else:
-                Calculator.tk.getNextToken()
 
-        return nodes.Block("COMMAND", blockList)
+        if Calculator.tk.char.type == 'KEYSOPEN':
+            Calculator.tk.getNextToken()
+            while Calculator.tk.char.type != 'KEYSCLOSE':
+                if Calculator.tk.char.type == 'EOF':
+                    raise NameError("Err: No ended block 1")
+                blockList.append(Calculator.Command())
+            if Calculator.tk.char.type != 'KEYSCLOSE':
+                Calculator.tk.getNextToken()
+            else:
+                raise NameError("Err: No ended block")
+        else:
+            raise NameError("Err: No opened block")
+        
+        return nodes.Block("BLOCK",blockList)
     
     def Command():
         if Calculator.tk.char.type == 'IDENTIFIER':

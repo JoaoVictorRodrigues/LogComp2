@@ -1,5 +1,15 @@
-
-x1 = 3; /* bla bla $x1 = 9999998 */
-y2 = 4;
-z_final = x1 + y2 *33;
-println(z_final);
+{
+ x = readln();
+ y = readln();
+ println(x);
+ println(2*y);
+ while (x<=2){
+ if (y!=4 && (y==3 || y==4)) {
+ if (x<2){
+ println(x);
+ }
+ }
+ x=x-1;
+ }
+ println(x);
+}
