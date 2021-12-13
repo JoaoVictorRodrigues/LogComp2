@@ -42,10 +42,10 @@ class Parser:
             variable = letter
             
             if variable in lock:
-                print(variable.upper(), variable)
+                # print(variable.upper(), variable)
                 self.char = (Token(variable.upper(), variable))
             else:
-                print("IDENTIFIER", variable)
+                # print("IDENTIFIER", variable)
                 self.char = (Token('IDENTIFIER',variable))
 
         elif self.origin[self.index].isdigit():
