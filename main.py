@@ -145,14 +145,14 @@ class Calculator:
             return out
 
 if __name__ == "__main__": 
-    if (len(sys.argv) == 2):
-        file = sys.argv[1]
-    else:
-        raise NameError('Err: only one .c file')
+    # if (len(sys.argv) == 2):
+    arg = sys.argv[1]
+    # else:
+    #     raise NameError('Err: only one .c file')
     symbs = nodes.SymbolTable()
 
-    with open (file, 'r') as file:
-        arg = file.read()
+    # with open (file, 'r') as file:
+    #     arg = file.read()
     out = Calculator.run(arg)
 
     out.Evaluate(symbs)
