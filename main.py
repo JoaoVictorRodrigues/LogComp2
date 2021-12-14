@@ -132,21 +132,45 @@ class Calculator:
         return nodes.Block("BLOCK",blockList)
     
     def Command():
-        if Calculator.tk.char.type == 'IDENTIFIER':
+        if (Calculator.tk.char.type == 'INT'or
+            Calculator.tk.char.type == 'STR'):
+            Calculator.tk.getNextToken()
+            if Calculator.tk.char.type == 'IDENTIFIER':
+                var = Calculator.tk.char.value
+                save = Calculator.tk.char.type
+                Calculator.tk.getNextToken()
+                if Calculator.tk.char.type == 'ASSING':
+                    Calculator.tk.getNextToken()
+                    out = nodes.AssignmentOp(Calculator.tk.char.value, [var, Calculator.ExpOR()])
+                    if Calculator.tk.char.type == 'ENDLINE':
+                        # Calculator.tk.getNextToken()
+                        pass
+                    elif Calculator.tk.char.type == 'CLOSE':
+                        pass
+                    else:
+                        raise NameError("Err: Missing Endline IDENT")
+                elif Calculator.tk.char.type == 'ENDLINE':
+                    out = nodes.AssignmentOp(var, [])
+                    Calculator.tk.getNextToken() 
+                else:
+                    raise NameError("Err: Missing assigment symbol (=)")
+            
+
+        elif Calculator.tk.char.type == 'IDENTIFIER':
             var = Calculator.tk.char.value
-            Calculator.tk.getNextToken()            
+            Calculator.tk.getNextToken()
             if Calculator.tk.char.type == 'ASSING':
                 Calculator.tk.getNextToken()
                 out = nodes.AssignmentOp(Calculator.tk.char.value, [var, Calculator.ExpOR()])
                 if Calculator.tk.char.type == 'ENDLINE':
-                   Calculator.tk.getNextToken() 
+                    Calculator.tk.getNextToken() 
                 elif Calculator.tk.char.type == 'CLOSE':
                     pass
                 else:
-                   raise NameError("Err: Missing Endline IDENT")
+                    raise NameError("Err: Missing Endline IDENT")
             else:
                 raise NameError("Err: Missing assigment symbol (=)")
-        
+
         elif Calculator.tk.char.type == 'PRINTLN':
             Calculator.tk.getNextToken()
             if Calculator.tk.char.type == 'OPEN':
@@ -220,7 +244,7 @@ class Calculator:
 
         elif Calculator.tk.char.type == 'ENDLINE':
             out = nodes.NoOp(0,[])
-            Calculator.tk.getNextToken() 
+            Calculator.tk.getNextToken()
         else:
             out = nodes.NoOp(0,[])
             raise NameError("Err: Missing Endline END")

@@ -70,12 +70,20 @@ class SymbolTable:
         else:
             raise NameError("Err: Variable does't existis")
 
-    def setter(self, var, val):
-        self.symbDict[var] = val
+    def setter(self, type, var, val):
+        if type == "str":
+            self.symbDict[var] = str(val)
+        elif type == "int":
+            self.symbDict[var] = int(val)
+        else:
+            type == None
 
 class AssignmentOp(Node):
     def Evaluate(self, symbs):
-        return symbs.setter(self.children[0], self.children[1].Evaluate(symbs))
+        if len(self.children) == 2:
+            symbs.setter(None,self.children[0], self.children[1].Evaluate(symbs))
+        elif len(self.children)==3:
+            symbs.setter(self.children[0],self.children[1], self.children[2].Evaluate(symbs))
 
 class PrintOp(Node):
     def Evaluate(self, symbs):
@@ -103,3 +111,7 @@ class IfOp(Node):
 class InputOp(Node):
     def Evaluate(self, symbs):
         return int(input())
+
+class StrVal(Node):
+    def Evaluate(self, symbs):
+        return str(self.value)
