@@ -1,19 +1,16 @@
 {
-x = readln();
-y = readln();
-z = readln();
-if((!(x > 1)  || (y == 0)) && (z > 0)){
-    println(1);
-} else {
-    while(!(1 == 0 || 1 == 2) && (x < 5)) {
-        x = x + 1;
-        y = y + 2;
+    x = readln();
+    y = readln();
+    println(x);
+    println(2*y);
+    while (x<=2){
+        println(x);
+        if (y!=4 && (y==3 || y==4)) {
+            if (x<2){
+                println(x);
+            }
+        }
+        x=x-1;
     }
-
-}
-
-
-println(x);
-println(y);
-
+    println(x);
 }
