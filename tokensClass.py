@@ -42,10 +42,8 @@ class Parser:
             variable = letter
             
             if variable in lock:
-                # print(variable.upper(), variable)
                 self.char = (Token(variable.upper(), variable))
             else:
-                # print("IDENTIFIER", variable)
                 self.char = (Token('IDENTIFIER',variable))
 
         elif self.origin[self.index].isdigit():
@@ -77,6 +75,9 @@ class Parser:
             elif self.origin[self.index] == ')':
                 self.char = (Token('CLOSE', ')'))
                 self.index += 1
+            elif self.origin[self.index] == '=' and self.origin[self.index+1] == '=':
+                self.char = (Token('EQUAL', '=='))
+                self.index += 2
             elif self.origin[self.index] == '=':
                 self.char = (Token('ASSING', '='))
                 self.index += 1
@@ -89,12 +90,18 @@ class Parser:
             elif self.origin[self.index] == '}':
                 self.char = (Token('KEYSCLOSE', '}'))
                 self.index += 1
-            elif self.origin[self.index] == '=' and self.origin[self.index+1] == '=':
-                self.char = (Token('EQUAL', '=='))
+            elif self.origin[self.index] == '!' and self.origin[self.index+1] == '=':
+                self.char = (Token('DIFFERENT', '!='))
                 self.index += 2
             elif self.origin[self.index] == '!':
                 self.char = (Token('NOT', '!'))
                 self.index += 1
+            elif self.origin[self.index] == '>' and self.origin[self.index+1] == '=':
+                self.char = (Token('GREATER_OR_EQUAL', '>='))
+                self.index += 2
+            elif self.origin[self.index] == '<' and self.origin[self.index+1] == '=':
+                self.char = (Token('LESS_OR_EQUAL', '<='))
+                self.index += 2
             elif self.origin[self.index] == '>':
                 self.char = (Token('GREATER', '>'))
                 self.index += 1

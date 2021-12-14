@@ -53,7 +53,7 @@ class Calculator:
         return out
     
     def Factor():
-        # print(Calculator.tk.char.type,Calculator.tk.char.value)
+        # print(Calculator.tk.char.type,Calculator.tk.char.value)  
         if Calculator.tk.char.type == 'INT':
             out = Calculator.tk.char.value
             Calculator.tk.getNextToken()
@@ -61,14 +61,14 @@ class Calculator:
             return out
 
         elif Calculator.tk.char.type == 'OPEN':
-            Calculator.parentheses += 1
             Calculator.tk.getNextToken()
-            out = Calculator.Expression()
+            out = Calculator.ExpOR()
             if Calculator.tk.char.type == 'CLOSE':
                 Calculator.tk.getNextToken()
-                return out
+                # return out
             else:
                 raise NameError('Err: Missing parentheses')
+            return out
 
         elif (Calculator.tk.char.type == 'SUB' or 
               Calculator.tk.char.type == 'SUM' or 
@@ -97,7 +97,7 @@ class Calculator:
             Calculator.tk.getNextToken()
             return out
 
-        elif Calculator.tk.char.type == tokens.READLN:
+        elif Calculator.tk.char.type == 'READLN':
             Calculator.tk.getNextToken()
             if Calculator.tk.char.type == 'OPEN':
                 Calculator.tk.getNextToken()
@@ -109,8 +109,8 @@ class Calculator:
                 raise NameError("Erro: readln é uma função abra e feche parenteses para chama-la")
 
             out = nodes.InputOp("readln", [])
-            
         else:
+            # print(Calculator.tk.char.type)  
             raise NameError('Err: Ivalid Operation')
         
         return out
@@ -124,7 +124,7 @@ class Calculator:
                 if Calculator.tk.char.type == 'EOF':
                     raise NameError("Err: No ended block 1")
                 blockList.append(Calculator.Command())
-            if Calculator.tk.char.type != 'KEYSCLOSE':
+            if Calculator.tk.char.type == 'KEYSCLOSE':
                 Calculator.tk.getNextToken()
             else:
                 raise NameError("Err: No ended block")
@@ -139,10 +139,14 @@ class Calculator:
             Calculator.tk.getNextToken()
             if Calculator.tk.char.type == 'ASSING':
                 Calculator.tk.getNextToken()
-                out = nodes.AssignmentOp(Calculator.tk.char.value, [var, Calculator.Expression()])    
+                out = nodes.AssignmentOp(Calculator.tk.char.value, [var, Calculator.ExpOR()])  
+                if Calculator.tk.char.type == 'ENDLINE':
+                   Calculator.tk.getNextToken() 
+                else:
+                   raise NameError("Err: Missing Endline IDENT") 
             else:
                 raise NameError("Err: Missing assigment symbol (=)")
-                
+        
         elif Calculator.tk.char.type == 'PRINTLN':
             Calculator.tk.getNextToken()
             if Calculator.tk.char.type == 'OPEN':
@@ -150,17 +154,66 @@ class Calculator:
                 val = Calculator.Expression()
                 if Calculator.tk.char.type == 'CLOSE':
                     Calculator.tk.getNextToken()
+                    if Calculator.tk.char.type == 'ENDLINE':
+                        Calculator.tk.getNextToken() 
+                    else:
+                        raise NameError("Err: Missing Endline PRINT") 
                 else:
-                    raise NameError("Err: Missig close parentheses")
+                    raise NameError("Err: Missig close parentheses PRINT")
             out = nodes.PrintOp("println", [val])
+                
+        elif Calculator.tk.char.type == 'IF':
+            ifList = []
+            Calculator.tk.getNextToken()
+            if Calculator.tk.char.type == 'OPEN':
+                Calculator.tk.getNextToken()
+                ifList.append(Calculator.ExpOR())
+                # print(Calculator.tk.char.type)
+                if Calculator.tk.char.type == 'CLOSE':
+                    Calculator.tk.getNextToken()
+                    ifList.append(Calculator.Command())
+                else:
+                    raise NameError("Err: Missing close parentheses IF")
 
+                if Calculator.tk.char.type == 'ELSE':
+                    Calculator.tk.getNextToken()
+                    ifList.append(Calculator.Command())
+
+            else:
+                raise NameError("Err: Missig open parentheses")
+            out = nodes.IfOp('if',ifList)
+
+        elif Calculator.tk.char.type == 'WHILE':
+            Calculator.tk.getNextToken()
+            if Calculator.tk.char.type == 'OPEN':
+                Calculator.tk.getNextToken()
+                val = Calculator.ExpOR()
+                # print(Calculator.tk.char.type)
+                if Calculator.tk.char.type == 'CLOSE':
+                    Calculator.tk.getNextToken()
+                    out = nodes.WhileOp('while',[val,Calculator.Command()])
+                else:
+                    raise NameError("Err: Missig close parentheses WHILE")
+            else:
+                raise NameError("Err: Missig open parentheses")
+        
+                
+        elif Calculator.tk.char.type == "KEYSOPEN":
+            out = Calculator.Block()
+
+        elif Calculator.tk.char.type == 'ENDLINE':
+            out = nodes.NoOp(0,[])
+            Calculator.tk.getNextToken() 
         else:
-            out = nodes.NoOp(0, [])
-        return out
+            out = nodes.NoOp(0,[])
+            raise NameError("Err: Missing Endline END")
+        
+        return out 
+
 
     def ExpOR():
         out = Calculator.ExpAND()
-        while Calculator.tk.actual.type == 'OR':
+        while Calculator.tk.char.type == 'OR':
             Calculator.tk.getNextToken()
             children = [out, Calculator.ExpAND()]
             out = nodes.BinOp('||', children)
@@ -168,7 +221,7 @@ class Calculator:
 
     def ExpAND():
         out = Calculator.ExpEQUAL()
-        while Calculator.tk.actual.type == 'AND':
+        while Calculator.tk.char.type == 'AND':
             Calculator.tk.getNextToken()
             children = [out, Calculator.ExpEQUAL()]
             out = nodes.BinOp('&&', children)
@@ -176,26 +229,46 @@ class Calculator:
 
     def ExpEQUAL():
         out = Calculator.ExpREL()
-        while Calculator.tk.actual.type == 'EQUAL':
+        while Calculator.tk.char.type == 'EQUAL':
             Calculator.tk.getNextToken()
             children = [out, Calculator.ExpREL()]
             out = nodes.BinOp('==', children)
         return out
 
     def ExpREL():
-        out = Calculator.Expression()
-        while (Calculator.tk.actual.type == 'GREATER' 
-               or Calculator.tk.actual.type == 'LESS'):
+        out = Calculator.ExpDIFF()
+        while (Calculator.tk.char.type == 'GREATER' 
+               or Calculator.tk.char.type == 'LESS'
+               or Calculator.tk.char.type == 'GREATER_OR_EQUAL'
+               or Calculator.tk.char.type == 'LESS_OR_EQUAL'):
                
-            if Calculator.tk.actual.type == 'GREATER':
+            if Calculator.tk.char.type == 'GREATER':
                 Calculator.tk.getNextToken()
-                children = [out, Calculator.Expression()]
+                children = [out, Calculator.ExpDIFF()]
                 out = nodes.BinOp('>', children)
 
-            elif Calculator.tk.actual.type == 'LESS':
+            elif Calculator.tk.char.type == 'LESS':
                 Calculator.tk.getNextToken()
-                children = [out, Calculator.Expression()]
+                children = [out, Calculator.ExpDIFF()]
                 out = nodes.BinOp('<', children)
+
+            elif Calculator.tk.char.type == 'GREATER_OR_EQUAL':
+                Calculator.tk.getNextToken()
+                children = [out, Calculator.ExpDIFF()]
+                out = nodes.BinOp('>=', children)
+
+            elif Calculator.tk.char.type == 'LESS_OR_EQUAL':
+                Calculator.tk.getNextToken()
+                children = [out, Calculator.ExpDIFF()]
+                out = nodes.BinOp('<=', children)   
+        return out
+
+    def ExpDIFF():
+        out = Calculator.Expression()
+        while Calculator.tk.char.type == 'DIFFERENT':
+            Calculator.tk.getNextToken()
+            children = [out, Calculator.Expression()]
+            out = nodes.BinOp('!=', children)
         return out
     
                       

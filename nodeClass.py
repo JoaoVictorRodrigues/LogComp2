@@ -26,6 +26,12 @@ class BinOp(Node):
             return self.children[0].Evaluate(symbs) or self.children[1].Evaluate(symbs)
         elif self.value == '&&':
             return self.children[0].Evaluate(symbs) and self.children[1].Evaluate(symbs)
+        elif self.value == '>=':
+            return self.children[0].Evaluate(symbs) >= self.children[1].Evaluate(symbs)
+        elif self.value == '<=':
+            return self.children[0].Evaluate(symbs) <= self.children[1].Evaluate(symbs)
+        elif self.value == '!=':
+            return self.children[0].Evaluate(symbs) != self.children[1].Evaluate(symbs)    
 
         
 class UnOp(Node):
