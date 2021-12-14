@@ -85,6 +85,13 @@ class WhileOp(Node):
     def Evaluate(self, symbs):
         while self.children[0].Evaluate(symbs):
             self.children[1].Evaluate(symbs)
+
+class ForOp(Node):
+    def Evaluate(self,symbs):
+        self.children[0].Evaluate(symbs)
+        while (self.children[1].Evaluate(symbs)):
+            self.children[2].Evaluate(symbs)
+            self.children[2].Evaluate(symbs)
  
 class IfOp(Node):
     def Evaluate(self, symbs):

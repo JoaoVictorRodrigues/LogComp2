@@ -1,5 +1,5 @@
-lock = ["println","if","else","while","readln"]
-PRINTLN,IF,ELSE,WHILE,READLN = lock
+lock = ["println","if","else","while","readln","for"]
+PRINTLN,IF,ELSE,WHILE,READLN,FOR = lock
 
 class Token:
     def __init__(self,Type,Value):

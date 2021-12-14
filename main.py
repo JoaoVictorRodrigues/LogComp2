@@ -53,7 +53,6 @@ class Calculator:
         return out
     
     def Factor():
-        # print(Calculator.tk.char.type,Calculator.tk.char.value)  
         if Calculator.tk.char.type == 'INT':
             out = Calculator.tk.char.value
             Calculator.tk.getNextToken()
@@ -110,7 +109,6 @@ class Calculator:
 
             out = nodes.InputOp("readln", [])
         else:
-            # print(Calculator.tk.char.type)  
             raise NameError('Err: Ivalid Operation')
         
         return out
@@ -136,14 +134,16 @@ class Calculator:
     def Command():
         if Calculator.tk.char.type == 'IDENTIFIER':
             var = Calculator.tk.char.value
-            Calculator.tk.getNextToken()
+            Calculator.tk.getNextToken()            
             if Calculator.tk.char.type == 'ASSING':
                 Calculator.tk.getNextToken()
-                out = nodes.AssignmentOp(Calculator.tk.char.value, [var, Calculator.ExpOR()])  
+                out = nodes.AssignmentOp(Calculator.tk.char.value, [var, Calculator.ExpOR()])
                 if Calculator.tk.char.type == 'ENDLINE':
                    Calculator.tk.getNextToken() 
+                elif Calculator.tk.char.type == 'CLOSE':
+                    pass
                 else:
-                   raise NameError("Err: Missing Endline IDENT") 
+                   raise NameError("Err: Missing Endline IDENT")
             else:
                 raise NameError("Err: Missing assigment symbol (=)")
         
@@ -168,7 +168,6 @@ class Calculator:
             if Calculator.tk.char.type == 'OPEN':
                 Calculator.tk.getNextToken()
                 ifList.append(Calculator.ExpOR())
-                # print(Calculator.tk.char.type)
                 if Calculator.tk.char.type == 'CLOSE':
                     Calculator.tk.getNextToken()
                     ifList.append(Calculator.Command())
@@ -188,7 +187,6 @@ class Calculator:
             if Calculator.tk.char.type == 'OPEN':
                 Calculator.tk.getNextToken()
                 val = Calculator.ExpOR()
-                # print(Calculator.tk.char.type)
                 if Calculator.tk.char.type == 'CLOSE':
                     Calculator.tk.getNextToken()
                     out = nodes.WhileOp('while',[val,Calculator.Command()])
@@ -197,6 +195,25 @@ class Calculator:
             else:
                 raise NameError("Err: Missig open parentheses")
         
+        elif Calculator.tk.char.type == 'FOR':
+            forList = []
+            Calculator.tk.getNextToken()
+            if Calculator.tk.char.type == 'OPEN':
+                Calculator.tk.getNextToken()
+                forList.append(Calculator.Command())
+
+                forList.append(Calculator.ExpOR())
+
+                Calculator.tk.getNextToken()
+                forList.append(Calculator.Command())
+
+                if Calculator.tk.char.type == 'CLOSE':
+                    Calculator.tk.getNextToken()
+                    out = nodes.ForOp('for', forList)
+                else:
+                    raise NameError("Err: Missig close parentheses FOR")
+            else:
+                raise NameError("Err: Missig open parentheses")
                 
         elif Calculator.tk.char.type == "KEYSOPEN":
             out = Calculator.Block()
